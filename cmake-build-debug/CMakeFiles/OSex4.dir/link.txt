@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/cc  -pthread -g -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/OSex4.dir/main.c.o CMakeFiles/OSex4.dir/threadPool.c.o CMakeFiles/OSex4.dir/osqueue.c.o  -o OSex4 

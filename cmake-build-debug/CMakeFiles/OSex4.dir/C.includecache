@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/rivkaschuss/CLionProjects/OSex4/main.c
+stdio.h
+-
+threadPool.h
+/Users/rivkaschuss/CLionProjects/OSex4/threadPool.h
+
+/Users/rivkaschuss/CLionProjects/OSex4/osqueue.c
+stdlib.h
+-
+osqueue.h
+/Users/rivkaschuss/CLionProjects/OSex4/osqueue.h
+
+/Users/rivkaschuss/CLionProjects/OSex4/osqueue.h
+
+/Users/rivkaschuss/CLionProjects/OSex4/threadPool.c
+threadPool.h
+/Users/rivkaschuss/CLionProjects/OSex4/threadPool.h
+
+/Users/rivkaschuss/CLionProjects/OSex4/threadPool.h
+zconf.h
+-
+stdlib.h
+-
+fcntl.h
+-
+pthread.h
+-
+osqueue.h
+/Users/rivkaschuss/CLionProjects/OSex4/osqueue.h
+
