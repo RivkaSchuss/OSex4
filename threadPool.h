@@ -20,7 +20,7 @@
 #define EXIT_FAILURE -1
 
 
-enum State {RUNNING, DESTROY, BEFORE_DESTROY, AFTER_JOIN};
+enum State {RUNNING, DESTROY, END, AFTER_JOIN};
 
 typedef struct task{
     void (*function)(void *);
