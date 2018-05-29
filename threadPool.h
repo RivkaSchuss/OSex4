@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include "osqueue.h"
+#include <stdio.h>
 
 
 #define ERROR "Error in system call\n"
@@ -19,7 +20,7 @@
 #define EXIT_FAILURE -1
 
 
-enum State {RUNNING, DESTROY, BEFORE_JOIN, AFTER_JOIN};
+enum State {RUNNING, DESTROY, BEFORE_DESTROY, AFTER_JOIN};
 
 typedef struct task{
     void (*function)(void *);
@@ -32,6 +33,7 @@ typedef struct thread_pool
     int stopped;
     enum State state;
     pthread_mutex_t lock, finalLock;
+    pthread_cond_t cond;
     pthread_t *threads;
     OSQueue *queue;
     void (*executeTasks)(void *);

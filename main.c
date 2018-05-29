@@ -12,7 +12,7 @@ void  function2Sleep();
 //the numbers need to be printed in synchronization, first 1..1 then 2..2 then 3...3
 /*
 int main() {
-    ThreadPool* threadPool =tpCreate(1);
+    ThreadPool* threadPool = tpCreate(1);
     char * args = (char *)malloc(10);
     tpInsertTask(threadPool,function1,args);
     tpInsertTask(threadPool,function2,args);
@@ -22,6 +22,7 @@ int main() {
     return 0;
 }
  */
+
 
 //the numbers are printed in a random order
 /*
@@ -68,9 +69,10 @@ int main() {
  */
 
 
-/*
+
+
 int main() {
-    ThreadPool *threadPool = tpCreate(1);
+    ThreadPool *threadPool = tpCreate(5);
     char *args = (char *) malloc(10);
 
     tpInsertTask(threadPool, function1WithSleep, args);
@@ -82,10 +84,11 @@ int main() {
     scanf("%d", &temp);
     return 0;
 }
- */
+
 
 
 //special destroy, checking that all the tasks have been executed.
+/*
 int main() {
     ThreadPool *threadPool = tpCreate(1);
     char *args = (char *) malloc(10);
@@ -98,6 +101,7 @@ int main() {
     free(args);
     return 0;
 }
+ */
 
 //checks that after we've called destroy, we can't add tasks
 /*int main() {

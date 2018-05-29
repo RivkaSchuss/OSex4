@@ -29,9 +29,10 @@ ThreadPool* tpCreate(int numOfThreads) {
         error();
 
 
-    if (pthread_mutex_init(&pool->lock, NULL) != 0 || pthread_mutex_init(&pool->finalLock, NULL) != 0)
+    if (pthread_mutex_init(&pool->lock, NULL) != 0 || pthread_mutex_init(&pool->finalLock, NULL) != 0 ||
+            pthread_cond_init(&pool->cond, NULL) != 0) {
         error();
-
+    }
 
     int i;
     for (i = 0; i < numOfThreads; ++i) {
@@ -52,9 +53,20 @@ void executeTasks(void* args) {
 
     ThreadPool *pool = (ThreadPool*)args;
 
-    while (pool->state == BEFORE_JOIN || pool->state == RUNNING) {
-        pthread_mutex_lock(&pool->lock);
-        if (pool->state == BEFORE_JOIN || pool->state == RUNNING) {
+    while (pool->state != BEFORE_DESTROY) {
+
+        if(osIsQueueEmpty(pool->queue) && (pool->state == RUNNING || pool->state == AFTER_JOIN)) {
+            pthread_mutex_lock(&pool->lock);
+            pthread_cond_wait(&pool->cond, &pool->lock);
+        }
+        else if (pool->state == DESTROY && osIsQueueEmpty(pool->queue)) {
+            break;
+        }
+
+        else {
+            pthread_mutex_lock(&pool->lock);
+        }
+        if (pool->state != BEFORE_DESTROY) {
             if (!osIsQueueEmpty(pool->queue)) {
                 task *task = osDequeue(pool->queue);
                 pthread_mutex_unlock(&pool->lock);
@@ -62,9 +74,9 @@ void executeTasks(void* args) {
                 free(task);
             } else {
                 pthread_mutex_unlock(&pool->lock);
-                //sleep(1);
+                sleep(1);
             }
-            if (pool->state == BEFORE_JOIN) {
+            if (pool->state == AFTER_JOIN) {
                 break;
             }
         }
@@ -84,9 +96,36 @@ void tpDestroy(ThreadPool* threadPool, int shouldWaitForTasks) {
     }
     pthread_mutex_unlock(&threadPool->finalLock);
 
+    pthread_mutex_lock(&threadPool->lock);
+    if (pthread_cond_broadcast(&threadPool->cond) > 0 || pthread_mutex_unlock(&threadPool->lock) > 0) {
+        error();
+    }
 
     if (shouldWaitForTasks) {
+        threadPool->state = DESTROY;
+    } else {
+        threadPool->state = AFTER_JOIN;
+    }
 
+    threadPool->stopped = 1;
+    int i;
+    int numOfThreads = threadPool->numOfThreads;
+    for (i = 0; i < numOfThreads; ++i) {
+        pthread_join(threadPool->threads[i], NULL);
+    }
+    threadPool->state = BEFORE_DESTROY;
+
+    while (!osIsQueueEmpty(threadPool->queue)) {
+        task* task = osDequeue(threadPool->queue);
+        free(task);
+    }
+
+    osDestroyQueue(threadPool->queue);
+    free(threadPool->threads);
+    free(threadPool);
+    pthread_mutex_destroy(&threadPool->lock);
+    pthread_mutex_destroy(&threadPool->finalLock);
+    /*
         //TODO fix busy waiting
         while(SUCCESS) {
             if (osIsQueueEmpty(threadPool->queue)) {
@@ -97,31 +136,8 @@ void tpDestroy(ThreadPool* threadPool, int shouldWaitForTasks) {
             }
         }
     }
+     */
 
-    threadPool->state = BEFORE_JOIN;
-    pthread_mutex_trylock(&threadPool->finalLock);
-    threadPool->stopped = 1;
-    pthread_mutex_unlock(&threadPool->finalLock);
-
-
-    int i;
-    int numOfThreads = threadPool->numOfThreads;
-    for (i = 0; i < numOfThreads; ++i) {
-        pthread_join(threadPool->threads[i], NULL);
-    }
-
-    while (!osIsQueueEmpty(threadPool->queue)) {
-        task* task = osDequeue(threadPool->queue);
-        free(task);
-    }
-
-    threadPool->state = AFTER_JOIN;
-
-    osDestroyQueue(threadPool->queue);
-    free(threadPool->threads);
-    free(threadPool);
-    pthread_mutex_destroy(&threadPool->lock);
-    pthread_mutex_destroy(&threadPool->finalLock);
 
 }
 
@@ -145,6 +161,9 @@ int tpInsertTask(ThreadPool* threadPool, void (*computeFunc) (void*), void* para
             newTask->argument = param;
             pthread_mutex_lock(&threadPool->lock);
             osEnqueue(threadPool->queue, newTask);
+            if (pthread_cond_signal(&threadPool->cond) != 0) {
+                error();
+            }
             pthread_mutex_unlock(&threadPool->lock);
             return SUCCESS;
         }
@@ -166,5 +185,6 @@ void* func(void* args) {
  */
 void error() {
     write(STDERR, ERROR, sizeof(ERROR));
+    printf("error\n");
     exit(EXIT_FAILURE);
 }

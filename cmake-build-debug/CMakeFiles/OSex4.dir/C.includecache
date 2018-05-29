@@ -35,4 +35,6 @@ pthread.h
 -
 osqueue.h
 /Users/rivkaschuss/CLionProjects/OSex4/osqueue.h
+stdio.h
+-
 
