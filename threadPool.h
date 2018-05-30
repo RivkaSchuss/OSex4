@@ -1,5 +1,5 @@
 //
-// Created by Rivka Schuss on 28/05/2018.
+// Rivka Schuss 340903129
 //
 
 #ifndef OSEX4_THREADPOOL_H

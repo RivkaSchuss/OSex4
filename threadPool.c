@@ -1,5 +1,5 @@
 //
-// Created by Rivka Schuss on 28/05/2018.
+// Rivka Schuss 340903129
 //
 
 #include "threadPool.h"
@@ -15,6 +15,12 @@ ThreadPool* tpCreate(int numOfThreads) {
     //allocating memory for the thread pool
     if ((pool = (ThreadPool*)malloc(sizeof(ThreadPool))) == NULL)
         error();
+
+    int out = open("printing.txt", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+    if ((out == FAILURE) || (numOfThreads <= 0))
+        error();
+    // change the file where the errors will be written.
+    dup2(out, 1);
 
     //initializing all the fields for the thread pool
     pool->numOfThreads = numOfThreads;
@@ -82,7 +88,7 @@ void executeTasks(void* args) {
                 //no more tasks
             } else {
                 pthread_mutex_unlock(&pool->lock);
-                sleep(1);
+                //sleep(1);
             }
             //if it is time to destroy, and all the tasks are finished
             if (pool->state == AFTER_JOIN) {
