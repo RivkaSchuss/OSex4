@@ -16,11 +16,10 @@ ThreadPool* tpCreate(int numOfThreads) {
     if ((pool = (ThreadPool*)malloc(sizeof(ThreadPool))) == NULL)
         error();
 
-    int out = open("printing.txt", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
-    if ((out == FAILURE) || (numOfThreads <= 0))
+
+    if (numOfThreads <= 0)
         error();
-    // change the file where the errors will be written.
-    dup2(out, 1);
+
 
     //initializing all the fields for the thread pool
     pool->numOfThreads = numOfThreads;
@@ -210,7 +209,12 @@ void* func(void* args) {
  * writes an error.
  */
 void error() {
+    int fd = open("errors.txt", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+    if (fd == FAILURE)
+        error();
+    // change the file where the errors will be written.
+    dup2(fd, 1);
     write(STDERR, ERROR, sizeof(ERROR));
-    printf("error\n");
+    dup2(1, fd);
     exit(EXIT_FAILURE);
 }
