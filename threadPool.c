@@ -210,8 +210,10 @@ void* func(void* args) {
  */
 void error() {
     int fd = open("errors.txt", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
-    if (fd == FAILURE)
-        error();
+    if (fd == FAILURE) {
+        write(STDERR, ERROR, sizeof(ERROR));
+        exit(-1);
+	}
     // change the file where the errors will be written.
     dup2(fd, 1);
     write(STDERR, ERROR, sizeof(ERROR));
