@@ -216,5 +216,5 @@ void error() {
     dup2(fd, 1);
     write(STDERR, ERROR, sizeof(ERROR));
     dup2(1, fd);
-    exit(EXIT_FAILURE);
+    exit(-1);
 }

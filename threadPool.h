@@ -17,7 +17,6 @@
 #define STDERR 2
 #define SUCCESS 1
 #define FAILURE 0
-#define EXIT_FAILURE -1
 
 
 enum State {RUNNING, DESTROY, END, AFTER_JOIN};
